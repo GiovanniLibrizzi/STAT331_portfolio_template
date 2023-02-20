@@ -1,0 +1,139 @@
+---
+title: "Challenge 4"
+author: "Giovanni Librizzi"
+format:
+  html:
+    self-contained: true
+    code-tools: true
+editor: visual
+execute:
+  echo: true
+  error: true
+  messages: false
+  warnings: false
+---
+
+# Housing Prices
+
+Import data
+
+```{r}
+#| message = FALSE
+library(tidyverse)
+avocado <- read_csv(here::here("Week4", "Lab4", "avocado.csv"))
+
+# Clean the base avocado dataset
+avocado_clean <- avocado |>
+  rename("sales_hass_small" = `4046`) |>
+  rename("sales_hass_large" = `4225`) |>
+  rename("sales_hass_extralarge" = `4770`) |>
+  rename("total_volume" = "Total Volume") |>
+  rename("bags_total" = "Total Bags") |>
+  rename("bags_small" = "Small Bags") |>
+  rename("bags_large" = "Large Bags") |>
+  rename("bags_extra_large" = "XLarge Bags") |>
+  mutate(type = as.factor(type)) |>
+  select(!"...1")
+
+california_names <- tibble(
+  region = c("LosAngeles", 
+             "SanDiego", 
+             "Sacramento", 
+             "SanFrancisco"
+             )
+)
+
+avocado_california <- avocado_clean |>
+  semi_join(california_names, by = "region")
+```
+
+New data:
+
+```{r}
+housing_prices <- tibble(
+  region = c(
+    "LosAngeles", 
+    "SanDiego", 
+    "Sacramento", 
+    "SanFrancisco"
+   ),
+ 
+  `2015` = c(
+    565063,
+    501262,
+    247269,
+    1072800
+  ), 
+  `2016` = c(
+    609454,
+    568000,
+    275083,
+    1146700
+  ),
+  `2017` = c(
+    650583,
+    575975,
+    304455,
+    1246600
+  ),
+  `2018` = c(
+    706479,
+    618500,
+    330190,
+    1337600
+  )
+)
+
+housing_prices <- housing_prices |>
+  pivot_longer(cols = `2015`:`2018`,
+               names_to = "year",
+               values_to = "median_house_cost") |>
+  mutate(year = as.numeric(year))
+```
+
+Data from:
+
+https://www.redfin.com/city/17151/CA/San-Francisco/housing-market https://www.zillow.com/home-values/54296/san-diego-ca/\
+https://www.zillow.com/home-values/12447/los-angeles-ca/\
+https://www.zillow.com/home-values/20288/sacramento-ca/
+
+Prepare data
+
+```{r warning = FALSE, message = FALSE}
+
+
+ca_avocado_housing <- avocado_california |>
+  group_by(region, year) |>
+  summarize(
+    median_total_sold = median(total_volume), 
+    median_avocado_price = median(AveragePrice)
+  ) |>
+  inner_join(housing_prices, by = c("region", "year"))
+
+ca_avocado_housing
+```
+
+Plot data
+
+```{r}
+ca_avocado_housing |>
+  ggplot() +
+  geom_col(mapping = aes(
+    x = year, 
+    y = median_total_sold 
+    )) + 
+  geom_col(mapping = aes(
+    x = year, 
+    y = median_house_cost, 
+    fill = median_house_cost
+    )) + 
+  facet_wrap(~ region) +
+  labs(
+    x = "Year",
+    y = "Median Total Avocados Sold"
+  )
+
+
+```
+
+We can see that as the years go by, the amount of avocados sold increases as the price of housing increases. This shows how Millennials keep buying avocados as house prices increase, so they constantly aren't able to afford a home.

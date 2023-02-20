@@ -1,0 +1,53 @@
+## Step 1: Read in the dataset `ages.csv`.
+
+```{r}
+# Code to read in the ages.csv data goes here! 
+read_csv("Ages_Data/ages.csv", col_names=TRUE)
+
+```
+
+## Step 2: Read in the dataset `ages_tab.txt`
+
+```{r}
+# Code to read in the ages_tab.txt data goes here! 
+library(tidyverse)
+library(readr)
+read_tsv("Ages_Data/ages_tab.txt")
+# this file isn't properly set up with tabs so this doesn't work !!!!!!
+
+```
+
+## Step 3: Read in the dataset `ages_mystery.txt`
+
+```{r}
+# Code to read in the ages_mystery.txt data goes here! 
+library(tidyverse)
+library(readr)
+read_delim("Ages_Data/ages_mystery.txt", delim = "|")
+
+```
+
+## Step 4: Read in the dataset `ages.xlsx`
+
+```{r}
+# Code to read in the ages.xlsx data goes here! 
+library(tidyverse)
+library(readxl)
+ages <- read_excel("Ages_Data/ages.xlsx")
+
+```
+
+## Step 5: Both `read.csv` and `read.table` have an optional argument called `stringsAsFactors`. Figure out what this does.
+
+When false, this makes the strings stay as a character type instead of being converted into the factor data type.
+
+## Step 6: Find a way to use `read_csv()` to read `ages.csv` with the variable "Name" as a factor and "Age" as a character.
+
+```{r}
+# Code to read in the ages.csv with "Name" as a factor and "Age" as a character goes here! 
+read_csv("Ages_Data/ages.csv", col_types = cols(Name = col_factor(), Age = col_character()))
+
+
+```
+
+------------------------------------------------------------------------

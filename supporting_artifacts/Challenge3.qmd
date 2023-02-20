@@ -1,0 +1,107 @@
+---
+title: "Challenge 3"
+author: "Giovanni Librizzi"
+format:
+  html:
+    self-contained: true
+    code-tools: true
+editor: visual
+execute: 
+  messsage: false
+  echo: true
+  error: true
+---
+
+Loading in packages
+
+```{r packages}
+#| message = FALSE
+
+# code chunk for loading packages and importing the data
+library(tidyverse)
+hiphop <- read_csv(here::here("Week3", "Lab3", "hiphop.csv"))
+hiphop_clean <- hiphop |>
+  # sets as factors
+  mutate(jayz = as.factor(jayz),
+         sex = as.factor(sex),
+         ethnic = as.factor(ethnic),
+         barkley = as.factor(barkley),
+         boondocks = as.factor(boondocks),
+         monique = as.factor(monique),
+         bieber = as.factor(bieber),
+         jayz1 = as.factor(jayz1),
+         boondocks1 = as.factor(boondocks1),
+         familiarity = as.factor(familiarity),
+         popularityScore = as.factor(popularityScore),
+         fam1 = as.factor(fam1)
+         ) |>
+  # replaces 0 with NA 
+  mutate(city = case_when(
+    city == 0 ~ NA_real_, 
+    TRUE ~ city
+    )) |>
+  mutate(county = case_when(
+    county == 0 ~ NA_real_, 
+    TRUE ~ county
+    )) |>
+  mutate(countyBlack = case_when(
+    countyBlack == 0 ~ NA_real_, 
+    TRUE ~ countyBlack
+    )) |>
+  # white boolean
+  mutate(white = if_else(
+    condition = ethnic == "white",
+    true = TRUE, 
+    false = FALSE
+    ))
+
+```
+
+# 5.1 Published Comparisons
+
+```{r}
+#| message = FALSE
+
+demographic <- hiphop_clean |>
+  distinct(subj, .keep_all = TRUE) |>
+  select(sex, 
+         white, 
+         intl, 
+         vocal, 
+         classical, 
+         folk, 
+         rock, 
+         country,
+         pop, 
+         alternative, 
+         hiphop
+         ) 
+
+# genre higher average 
+# male vs female
+demographic |>
+  group_by(sex) |>
+  summarize(
+    across(
+      .cols = intl:hiphop,
+      .fns = mean
+      )
+    )
+
+# white vs non-white
+demographic |>
+  group_by(white) |>
+  summarize(
+    across(
+      .cols = intl:hiphop,
+      .fns = mean
+      )
+    )
+  
+```
+
+Rock appeared to have a much higher distribution of men vs women, with men with a mean of 3.05 artists they reported liking in that genre and women at 1.93. Country was the opposite, with women having a mean of 0.78 while men having 0.39. Vocal did appear to have more men listening than women with men having a mean of 1.56 while women had 0.88.
+
+# 5.2 Study Design Critique - Data Ethics
+
+This study was looking at if non-African American young adults learned African-American English vocabulary through listening to hip-hop. One concern I have with this study is that it has a strange racial context where it seems to try and demonstrate that the main way non-Whites know African American context and vocabulary is through hip-hop, barely focusing on other possible ways and influences African Americans have had on American culture. Another concern I have with the study is with how they used the data to find country music's negative correlation with AAE comprehension and claiming that that personal identity is self-constructed.

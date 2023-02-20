@@ -1,0 +1,253 @@
+---
+title: "Lab 4"
+author: "Giovanni Librizzi"
+format:
+  html:
+    self-contained: true
+    code-tools: true
+editor: visual
+execute:
+  echo: true
+  error: true
+  message: false
+  warning: false
+---
+
+# Revision 2
+
+I really messed up and forgot to double check the document before uploading, I had a silly mistake where I forgot to remove an old variable chunk that was both unused and referencing something I removed. I made sure to remove that chunk and double check that it had no errors. So sorry about that.
+
+# Revision
+
+I skimped out on my description of the data, which was really irresponsible. I only mentioned that the data contained avocado data and never mentioned information such as where the data came from, how it was gathered, and what specific columns it contained. I also failed to understand the instructions for how to filter the regions and so I created an unnecessary tibble when I could have used anti-joins to get the desired result, so I made sure to correct that. In the same section, I fixed my renaming so it was all in a single `rename()` function instead of repeatedly piping rename over and over. Even though I got a success, I corrected my question 6 by displaying the raw data along with updating a graph to show the differences a lot clearer with separate points instead of using a bar chart.
+
+# Avocado Prices
+
+#### 0: Project Setup
+
+```{r}
+#| message = FALSE
+
+library(tidyverse)
+avocado <- read_csv(here::here("Week4", "Lab4", "avocado.csv"))
+```
+
+#### 1: Dataset Description
+
+This dataset contains the sales numbers of avocado and their average prices from Jan 2015 to March 2018 across various US regions. The data came from the official hass avocado website, where they had weekly 2018 retail scan data for units and price. It was then processed to fit into a single CSV file. The data includes columns on dates, average price for that day for both conventional and organic avocados, data on how many sold for each size of avocado and a column totaling those up, and the region that specific data is from.
+
+#### 2. Dataset Cleaning
+
+```{r}
+#| message = FALSE
+
+regions <- avocado |>
+  distinct(region)
+# Create tibbles with the various regions names
+
+major_region_names <- tibble(
+  region = c("SouthCentral",
+            "Southeast",
+            "West",
+            "Northeast",
+            "Midsouth",
+            "GreatLakes",
+            "Plains"
+            )
+)
+state_names <- tibble(
+  region = c("California", 
+             "SouthCarolina"
+             )
+)
+
+# Clean the base avocado dataset
+avocado_clean <- avocado |>
+  rename(
+    "sales_hass_small" = `4046`,
+    "sales_hass_large" = `4225`,
+    "sales_hass_extralarge" = `4770`,
+    "total_volume" = "Total Volume",
+    "bags_total" = "Total Bags",
+    "bags_small" = "Small Bags",
+    "bags_large" = "Large Bags",
+    "bags_extra_large" = "XLarge Bags"
+    ) |>
+  mutate(type = as.factor(type)) |>
+  select(!"...1")
+
+# Create sub-datasets based on region types
+
+avocado_states <- avocado_clean |>
+  semi_join(state_names, by = "region")
+
+avocado_major_region <- avocado_clean |>
+  semi_join(major_region_names, by = "region")
+
+avocado_metro_region <- avocado_clean |>
+  anti_join(major_region_names, by = "region") |>
+  anti_join(state_names, by = "region") |>
+  filter(region != "TotalUS")
+  
+avocado_totalus <- avocado_clean |>
+  filter(region == "TotalUS")
+
+
+```
+
+## 
+
+## Summarizing Avocado Sales
+
+**3.** Which major region sold the most organic, small Hass avocados in 2017?
+
+```{r}
+avocado_major_region |>
+  group_by(region) |>
+  filter(year == "2017" & type == "organic") |>
+  summarize(total_sold = sum(sales_hass_small)) |>
+  slice_max(order_by = total_sold)
+```
+
+The major region that sold the most organic, small Hass avocados in 2017 was the West, with 1870206 of that avocado sold.
+
+**4.** Use the `separate()` function to split the `Date` variable into year, month, and day. In which month is the highest volume of avocado sales?
+
+```{r}
+
+# Separate date
+avocado_totalus <- avocado_totalus |>
+  select(!year) |>
+  separate(col = Date,
+           sep = "-",
+           into = c("year", "month", "day")
+           )
+
+avocado_totalus |>
+  group_by(month) |>
+  summarize(total_sales = sum(total_volume)) |>
+  slice_max(order_by = total_sales)
+```
+
+In all of the United States, February is the month with the most sales.
+
+**5.** Which metro area regions sold the most total avocados? Plot side-by-side boxplots of total volume for only the five regions with the highest averages for the `Total Volume` variable.
+
+```{r}
+# Find top 5 regions (metro)
+metro_top_5 <- avocado_metro_region |>
+  group_by(region) |>
+  summarize(total_sales = sum(total_volume)) |>
+  slice_max(order_by = total_sales, n = 5)
+
+# Generate plot
+options(scipen = 999)
+avocado_metro_region |>
+  semi_join(metro_top_5, by = "region") |>
+  ggplot(mapping = aes(x = total_volume, y = region)) +
+  geom_boxplot() +
+  labs(
+    x = "Total Volume of Avocados Sold",
+    y = "Metro Region",
+    title = "Total Volume of Avocados Sold by the Metro Region"
+  )
+
+```
+
+source for disabling scientific notation in graph: https://www.datakwery.com/post/2020-07-11-scientific-notation-in-r
+
+## **Reshaping**
+
+### Reshape to California regions only
+
+```{r}
+california_names <- tibble(
+  region = c("LosAngeles", 
+             "SanDiego", 
+             "Sacramento", 
+             "SanFrancisco"
+             )
+)
+
+avocado_california <- avocado_clean |>
+  semi_join(california_names, by = "region")
+```
+
+**6.** In which regions is the price of organic versus conventional avocados most different? Support your answer with a few summary statistics and a visualization.
+
+```{r}
+ca_city_difference <- avocado_california |>
+  select(Date, type, AveragePrice, region) |>
+  pivot_wider(names_from = type, values_from = AveragePrice) |>
+  group_by(region) |>
+  summarize(type_diff = sum(organic)-sum(conventional), 
+            type_mean_diff = mean(organic)-mean(conventional),
+            mean_organic = mean(organic),
+            mean_conventional = mean(conventional)
+            ) |>
+  arrange(desc(type_mean_diff))
+
+ca_city_difference |>
+  ggplot(mapping = aes(x = region, y = type_mean_diff) ) +
+  geom_point(mapping = aes(y = mean_organic, color = "Organic")) +
+  geom_point(mapping = aes(y = mean_conventional, color = "Conventional")) +
+  labs(
+    x = "Region in California",
+    y = "Mean price of types for mean avocados sold",
+  )
+
+ca_city_difference
+  
+```
+
+San Francisco has the largest difference between the prices for organic avocados and the prices for conventional avocados. In this chart, we can see how the difference between the mean of these types when grouped by each region shows San Francisco has a much higher difference.
+
+**7.** The following plot shows, for all four California regions, the proportion of the mean Hass avocado sales that are small, large, or extra large; conventional vs. organic. Recreate the plot.
+
+```{r}
+
+# Reorder data
+ca_hass_type <- avocado_california |>
+  select(Date, type, AveragePrice, region, sales_hass_small, sales_hass_large, sales_hass_extralarge) |>
+  pivot_longer(
+    cols = sales_hass_small:sales_hass_extralarge,
+    names_to = "hass",
+    values_to = "sales"
+  ) |>
+  mutate(hass = as.factor(hass)) |>
+  arrange(desc(hass))
+  
+
+
+# Generate graph
+ca_hass_type |>
+  ggplot(mapping = aes(
+    x = region, 
+    y = sales, 
+    fill = factor(
+      hass, 
+      levels = c("sales_hass_small", 
+                 "sales_hass_large", 
+                 "sales_hass_extralarge")
+      )
+    )) +
+  geom_bar(position = "fill", stat = "identity") +
+  scale_fill_manual(
+    values = c("#a6cee3", "#1f78b4", "#b2df8a"),
+    labels = c("Small", "Large", "Extra Large"),
+    name = "Avocado Size") +
+  scale_x_discrete(guide = guide_axis(n.dodge=2))+
+  facet_wrap(~ type) +
+  labs(x = "Region of CA",
+      y = "Proportion of Mean Avocados Sold"   
+  )
+
+
+```
+
+Source for scale_x\_discrete staggered x labels: https://datavizpyr.com/how-to-dodge-overlapping-text-on-x-axis-labels-in-ggplot2/
+
+Source for changing order of factor https://stackoverflow.com/questions/47025828/change-the-order-of-stacked-fill-columns-in-ggplot2
+
+**\
+**

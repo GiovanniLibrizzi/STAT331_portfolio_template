@@ -1,0 +1,105 @@
+---
+title: "Practice Activity 5:  Dates and Times"
+format: 
+  html: 
+    self-contained: true
+    code-tools: true
+editor: visual
+execute: 
+  echo: true
+  include: true
+  message: false
+  warning: false
+---
+
+```{r packages}
+# Load in the packages you need here!
+library(here)
+library(tidyverse)
+```
+
+## Solve the mystery
+
+One of the most famous mysteries in California history is the identity of the so-called "Zodiac Killer", who murdered 7 people in Northern California between 1968 and 1969.
+
+A new murder was committed last year in California, suspected to be the work of a new Zodiac Killer on the loose. Fortunately, a camera was planted at the location where the body was found. The FBI has provided you with a list of people who entered the building last year, and what date and time they entered, in Pacific Standard Time (PST). This dataset is available in the data folder, named `suspects_times.csv`.
+
+Unfortunately, the date and time of the murder is not known. You have been hired to crack the case. Use the clues below to discover the murderer's identity.
+
+```{r}
+suspects <- read_csv(here::here("data",
+                                "suspect_times.csv")
+                     )
+```
+
+1.  Based on the sunburn patterns on the body, the murder was not committed in the morning.
+
+    ```{r}
+    suspects <- suspects %>%
+      mutate(Time.Spotted = ymd_hms(Time.Spotted),
+             Time.Spotted = force_tz(Time.Spotted,
+                                     tzone = "America/Los_Angeles")
+             )
+    suspects <- suspects %>%
+      filter(pm(Time.Spotted) == TRUE)
+    # Mutating to make sure that time spotted is in date time
+    # Then forcing it to be within CA Time Zone
+    # Then filter data to be after morning
+
+    ```
+
+2.  The room where the murder was committed is closed Tuesdays and Thursdays, so the murder did not happen on those days.
+
+```{r}
+suspects_clean <- suspects %>%
+  filter(!wday(Time.Spotted, label = TRUE, abbr = FALSE)
+         %in% c("Tuesday",
+                "Thursday"))
+
+```
+
+1.  
+
+2.  It is believed that the murder was committed within 5 weeks (35 days) of Thanksgiving, 2018.
+
+```{r}
+thanksgiving_2018 <- ymd("2018-11-22")
+thx_int <- interval((start = thanksgiving_2018 - days(35)),
+                                  (end = thanksgiving_2018 + days(35)))
+suspects_clean <- suspects_clean %>%
+  filter(Time.Spotted %within% thx_int)
+```
+
+1.  It was discovered that just before being murdered, the victim tried to send a text to their sister in Iceland, saying "Goodnight over there!"
+
+```{r}
+suspects_clean <- suspects_clean %>%
+  filter(pm(with_tz(Time.Spotted, tzone = "Iceland")))
+```
+
+1.  The Killer left behind a birthday card at the scene of the crime. The date is smudged, but the number of the month is shown to be 22. It is thought that perhaps this murder took place less than two days after the Killer's birthday.
+
+```{r}
+suspects_clean <- suspects_clean %>%
+  filter(between(x = day(Time.Spotted), 22, 24))
+```
+
+1.  The Killer is amused by our efforts, and he has sent us a cryptic clue:
+
+> "The number of minutes between Jan 1, 1970 at midnight and the time I arrived on the scene is divisible by 10."
+
+::: callout-tip
+# Double hint
+
+The `difftime()` function is crucial for this step! Also, it may appear that the time differences are all divisible by 10, but they are not! They have trailing decimal values!
+:::
+
+```{r}
+date_hint <- ymd_hms("1970-01-01 00:00:00")
+suspects_clean <- suspects_clean %>%
+  filter(as.integer(difftime(Time.Spotted, date_hint, units = "mins")) %% 10 == 0)
+```
+
+Who is the killer? (Only one name should remain.)
+
+Ted Cruz

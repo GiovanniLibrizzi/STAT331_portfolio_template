@@ -1,0 +1,62 @@
+---
+title: "Challenge 2"
+author: "Giovanni Librizzi"
+format:
+  html:
+    self-contained: true
+    code-tools: true
+editor: visual
+execute: 
+  echo: true
+  error: true
+---
+
+```{r setup}
+library(tidyverse)
+library(ggridges)
+library(RColorBrewer)
+surveys <- read_csv(here::here("Week2", "Lab2", "surveys.csv"))
+```
+
+# 
+
+Challenge: Medium (Ridge Plots)
+
+```{r}
+# Code for question 13! (already done in advance)
+ggplot(data = surveys, mapping = aes(x = weight, y = species)) + 
+  geom_density_ridges(fill = "Turquoise") + 
+  labs(x = "Weight (g)", y = "Species", 
+       title = "Distribution of Weight Within Species"
+   )
+```
+
+Challenge: Spicy (Color Themes)
+
+2.1
+
+```{r}
+# Color palette
+cdPaletteRainbow <- c("#ff6961", "#ffb480", "#f8f38d", "#42d610", 
+                     "#08cad1", "#59adf6", "#9d94ff", "#c780e8")
+
+ggplot(data = surveys, mapping = aes(x = weight, y = species, color = genus)) + 
+  geom_jitter(color = "DarkGrey", alpha = 0.2) +
+  geom_boxplot(outlier.alpha = 0, lwd = 0.5) + 
+  scale_color_manual(values = cdPaletteRainbow) +
+  labs(x = "Weight (g)", y = "Species", color = "Rodent Genus",
+       title = "Distribution of Weight Within Species"
+   )
+```
+
+2.2
+
+```{r}
+ggplot(data = surveys, mapping = aes(x = weight, y = species, color = genus)) + 
+  geom_jitter(color = "DarkGrey", alpha = 0.2) +
+  geom_boxplot(outlier.alpha = 0, lwd = 0.5) + 
+  scale_colour_brewer(palette = "Pastel2") +
+  labs(x = "Weight (g)", y = "Species", color = "Rodent Genus",
+       title = "Distribution of Weight Within Species"
+   )
+```

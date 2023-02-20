@@ -11,7 +11,7 @@ execute:
   echo: true
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_\_.
+[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an A-. I have put a lot of effort into this class and I really have enjoyed learning a langauge that's got quite a different approach than most. I really like seeing how it combines stuff like SQL-style table querying with simple file parsing and easy graph creation and customization. Although I've had to do a lot of revisions, I try and stay on top of them to make sure I'm still up to date in the class.
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from a Lab or Challenge assignment where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
@@ -19,80 +19,128 @@ execute:
 
 **WD-1: I can import data from a *variety* of formats (e.g., csv, xlsx, txt, etc.).**
 
--   `csv`
+-   `csv` (Lab 3, Q1)
 
 ```{r wd-1-csv}
-
+hiphop <- read_csv(here::here("Week3", "Lab3", "hiphop.csv"))
 ```
 
--   `xlsx`
+-   `xlsx` (Practice Activity 4)
 
 ```{r wd-1-xlsx}
-
+military <- read_xlsx(here::here("data", 
+                                 "gov_spending_per_capita.xlsx"), 
+                      sheet = "Share of Govt. spending", 
+                      skip = 7, 
+                      n_max = 190)
 ```
 
--   `txt`
+-   `txt` (Preview Activity 2.2)
 
 ```{r wd-1-txt}
-
+read_delim("Ages_Data/ages_mystery.txt", delim = "|")
 ```
 
-**WD-2: I can select necessary columns from a dataset.**
+**WD-2: I can select necessary columns from a dataset. (Lab 3, Q9)**
 
 ```{r wd-2}
-
+demographics <- hiphop_clean |>
+  distinct(subj, .keep_all = TRUE) |>
+  select(sex, age, ethnic) 
 ```
 
 **WD-3: I can filter rows from a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
 
--   numeric
+-   numeric (Lab 3, Q11)
 
 ```{r wd-3-numeric}
-
+under20 <- hiphop_clean |>
+  filter(age < 20) |>
+  group_by(word) |>
+  summarize(
+    familiarity = mean(as.numeric(familiarity))
+  ) 
 ```
 
--   character -- specifically a string
+-   character -- specifically a string (Lab 3, Q2)
 
 ```{r wd-3-string}
-
+hiphop |>
+  filter(subj == "p15") 
 ```
 
--   factor
+-   factor (Lab 3, Q12)
 
 ```{r wd-3-factor}
-
+nonwhitewomen <- hiphop_clean |>
+  filter(white == FALSE & sex == "Female") |>
+  group_by(word) |>
+  summarize(
+    familiarity = mean(as.numeric(familiarity))
+  ) 
 ```
 
--   date
+-   date (Practice Activity 5.1)
 
 ```{r wd-3-date}
-
+suspects_clean <- suspects_clean %>%
+  filter(pm(with_tz(Time.Spotted, tzone = "Iceland")))
 ```
 
 **WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
 
--   numeric
+-   numeric (Lab 3 Q11)
 
 ```{r wd-4-numeric}
-
+under20 <- hiphop_clean |>
+  filter(age < 20) |>
+  group_by(word) |>
+  summarize(
+    familiarity = mean(as.numeric(familiarity))
+  ) 
 ```
 
--   character -- specifically a string
+-   character -- specifically a string (Challenge 4)
 
 ```{r wd-4-string}
-
+# I have not specifically converted to a character yet, but I have converted many strings to new variables
+housing_prices <- housing_prices |>
+  pivot_longer(cols = `2015`:`2018`,
+               names_to = "year",
+               values_to = "median_house_cost") |>
+  mutate(year = as.numeric(year))
 ```
 
--   factor
+-   factor (Lab 3 Q5)
 
 ```{r wd-4-factor}
-
+hiphop_clean <- hiphop |>
+  # sets as factors
+  mutate(across(
+    .cols = c(
+      jayz,
+      sex,
+      ethnic,
+      barkley,
+      boondocks,
+      monique,
+      bieber,
+      jayz1,
+      boondocks1,
+      familiarity,
+      popularityScore
+    ), .fns = as.factor
+  )) # more piping cut out here 
 ```
 
--   date
+-   date (Practice Activity 5.1)
 
 ```{r wd-4-date}
-
+suspects <- suspects %>%
+  mutate(Time.Spotted = ymd_hms(Time.Spotted),
+         Time.Spotted = force_tz(Time.Spotted,
+                                 tzone = "America/Los_Angeles")
+         )
 ```
 
 **WD-5: I can use mutating joins to combine multiple dataframes.**
@@ -100,53 +148,85 @@ execute:
 -   `left_join()`
 
 ```{r wd-5-left}
-
+# I have not encountered a situation that required a left_join so far.
 ```
 
--   `right_join()`
+-   `right_join()` (Preview Activity 4.3)
 
 ```{r wd-5-right}
-
+right_join(prof_info, prof_course)
 ```
 
--   `inner_join()`
+-   `inner_join()` (Challenge 4)
 
 ```{r wd-5-inner}
-
+ca_avocado_housing <- avocado_california |>
+  group_by(region, year) |>
+  summarize(
+    median_total_sold = median(total_volume), 
+    median_avocado_price = median(AveragePrice)
+  ) |>
+  inner_join(housing_prices, by = join_by(region, year))
 ```
 
--   `full_join()`
+-   `full_join()` (Preview Activity 4.3)
 
 ```{r wd-5-full}
-
+prof_course |>
+  pivot_longer(cols = c("Stat_331", "Stat_330", "Stat_431"),
+               names_to = "course",
+               values_to = "can_teach"
+               ) |>
+  full_join(course_info, by = "course")
 ```
 
 **WD-6: I can use filtering joins to filter rows from a dataframe.**
 
--   `semi_join()`
+-   `semi_join()` (Lab 4, \~Q6)
 
 ```{r wd-6-semi}
-
+avocado_california <- avocado_clean |>
+  semi_join(california_names, by = join_by(region))
 ```
 
--   `anti_join()`
+-   `anti_join()` (Lab 4, \~Q2)
 
 ```{r wd-6-anti}
-
+avocado_metro_region <- avocado_clean |>
+  anti_join(major_region_names, by = join_by(region)) |>
+  anti_join(state_names, by = join_by(region)) |>
+  filter(region != "TotalUS")
 ```
 
 **WD-7: I can pivot dataframes from long to wide and visa versa**
 
--   `pivot_longer()`
+-   `pivot_longer()` (Lab 4, Q7)
 
 ```{r wd-7-long}
-
+ca_hass_type <- avocado_california |>
+  select(Date, type, AveragePrice, region, sales_hass_small, sales_hass_large, sales_hass_extralarge) |>
+  pivot_longer(
+    cols = sales_hass_small:sales_hass_extralarge,
+    names_to = "hass",
+    values_to = "sales"
+  ) |>
+  mutate(hass = as.factor(hass)) |>
+  arrange(desc(hass))
 ```
 
--   `pivot_wider()`
+-   `pivot_wider()` (Lab 4, Q6)
 
 ```{r wd-7-wide}
-
+ca_city_difference <- avocado_california |>
+  select(Date, type, AveragePrice, region) |>
+  pivot_wider(names_from = type, values_from = AveragePrice) |>
+  group_by(region) |>
+  summarize(type_diff = sum(organic)-sum(conventional), 
+            type_mean_diff = mean(organic)-mean(conventional),
+            mean_organic = mean(organic),
+            mean_conventional = mean(conventional)
+            ) |>
+  arrange(desc(type_mean_diff))
 ```
 
 ## Reproducibility
@@ -155,18 +235,52 @@ execute:
 
 I've done this in the following provided assignments:
 
+Lab 3, Lab 4, Lab 5
+
 **R-2: I can write well documented and tidy code.**
 
--   Example 1
+-   Example 1 (Lab 4, Q5, tidy code and comments)
 
 ```{r r-2-1}
+# Find top 5 regions (metro)
+metro_top_5 <- avocado_metro_region |>
+  group_by(region) |>
+  summarize(total_sales = sum(total_volume)) |>
+  slice_max(order_by = total_sales, n = 5)
 
+# Generate plot
+options(scipen = 999)
+avocado_metro_region |>
+  semi_join(metro_top_5, by = join_by(region)) |>
+  ggplot(mapping = aes(x = total_volume, y = region)) +
+  geom_boxplot() +
+  labs(
+    x = "Total Volume of Avocados Sold",
+    y = "Metro Region",
+    title = "Total Volume of Avocados Sold by the Metro Region"
+  )
 ```
 
--   Example 2
+-   Example 2 (Lab 5, Q2.4)
 
 ```{r r-2-2}
-
+ggplot(data = survey_genus,
+       mapping = aes(
+         x = year, 
+         y = weight_mean, 
+         color = fct_reorder(genus, desc(weight_mean))
+         )
+       ) +
+  geom_line() +
+  labs(
+    x = "Year",
+    y = NULL,
+    title = "Mean Weight by Year for Genus of Rodent",
+    color = "Genus of Rodent"
+    ) + 
+  theme(
+    plot.title.position = "plot"
+  )
 ```
 
 **R-3: I can write robust programs that are resistant to changes in inputs.**
@@ -187,134 +301,317 @@ I've done this in the following provided assignments:
 
 **DVS-1: I can create visualizations for a *variety* of variable types (e.g., numeric, character, factor, date)**
 
--   numeric variables
+-   numeric variables (Lab 4, Q5)
 
 ```{r dvs-1-num}
-
+# Generate plot
+options(scipen = 999)
+avocado_metro_region |>
+  semi_join(metro_top_5, by = join_by(region)) |>
+  ggplot(mapping = aes(x = total_volume, y = region)) +
+  geom_boxplot() +
+  labs(
+    x = "Total Volume of Avocados Sold",
+    y = "Metro Region",
+    title = "Total Volume of Avocados Sold by the Metro Region"
+  )
 ```
 
--   numeric variables and categorical variables
+-   numeric variables and categorical variables (Lab 5, Q3.2)
 
 ```{r dvs-2-num-cat}
+day_order <- c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
+ggplot(data = rodents_week,
+       mapping = aes(
+         x = fct_relevel(day_of_week, day_order),
+         y = rodents_captured
+        )
+       ) +
+  geom_col() +
+  labs(x = "Day of Week",
+       y = NULL,
+       title = "Rodents Captured by Day of Week"
+   ) + 
+  theme(
+    plot.title.position = "plot"
+  )
 ```
 
--   categorical variables
+-   categorical variables (Lab 4 Q7)
 
 ```{r dvs-2-cat}
-
+# Generate graph
+ca_hass_type |>
+  ggplot(mapping = aes(
+    x = region, 
+    y = sales, 
+    fill = factor(
+      hass, 
+      levels = c("sales_hass_small", 
+                 "sales_hass_large", 
+                 "sales_hass_extralarge")
+      )
+    )) +
+  geom_bar(position = "fill", stat = "identity") +
+  scale_fill_manual(
+    values = c("#a6cee3", "#1f78b4", "#b2df8a"),
+    labels = c("Small", "Large", "Extra Large"),
+    name = "Avocado Size") +
+  scale_x_discrete(guide = guide_axis(n.dodge=2))+
+  facet_wrap(~ type) +
+  labs(x = "Region of CA",
+      y = "Proportion of Mean Avocados Sold"   
+  )
 ```
 
--   dates
+-   dates (Lab 5, Q2.4)
 
 ```{r dvs-2-date}
-
+ggplot(data = survey_genus,
+       mapping = aes(
+         x = year, 
+         y = weight_mean, 
+         color = fct_reorder(genus, desc(weight_mean))
+         )
+       ) +
+  geom_line() +
+  labs(
+    x = "Year",
+    y = NULL,
+    title = "Mean Weight (grams) by Year for Genus of Rodent Captured",
+    color = "Genus of Rodent"
+    ) + 
+  theme(
+    plot.title.position = "plot"
+  )
 ```
 
 **DVS-2: I use plot modifications to make my visualization clear to the reader.**
 
--   Example 1
+-   Example 1 (Lab 5, Q2.4) - Organized legend to be in the same order as lines
 
 ```{r dvs-2-1}
-
+ggplot(data = survey_genus,
+       mapping = aes(
+         x = year, 
+         y = weight_mean, 
+         color = fct_reorder(genus, desc(weight_mean))
+         )
+       ) +
+  geom_line() +
+  labs(
+    x = "Year",
+    y = NULL,
+    title = "Mean Weight (grams) by Year for Genus of Rodent Captured",
+    color = "Genus of Rodent"
+    ) + 
+  theme(
+    plot.title.position = "plot"
+  )
 ```
 
--   Example 2
+-   Example 2 (Lab 5, Q1) - order graph by weight and jitter so the raw data is visible
 
 ```{r dvs-2-2}
-
+ggplot(data = surveys, 
+       mapping = aes(
+         x = weight,
+         y = fct_reorder(species, weight) #species
+         )
+       ) + 
+  geom_jitter(color = "Tomato", alpha = 0.2) +
+  geom_boxplot(outlier.alpha = 0) + 
+  labs(x = "Weight (g)", y = NULL, 
+       title = "Distribution of Weight by Species of Rodent"
+   ) + 
+  theme(
+    plot.title.position = "plot"
+  )
 ```
 
 **DVS-3: I show creativity in my visualizations**
 
--   Example 1
+-   Example 1 (Challenge 2, Q2.2)
 
 ```{r dvs-3-1}
-
+ggplot(data = surveys, mapping = aes(x = weight, y = species, color = genus)) + 
+  geom_jitter(color = "DarkGrey", alpha = 0.2) +
+  geom_boxplot(outlier.alpha = 0, lwd = 0.5) + 
+  scale_colour_brewer(palette = "Pastel2") +
+  labs(x = "Weight (g)", y = "Species", color = "Rodent Genus",
+       title = "Distribution of Weight Within Species"
+   )
 ```
 
--   Example 2
+-   Example 2 (Lab 3, Q10) - jittered to show how much the age was clustered
 
 ```{r dvs-3-2}
-
+demographics |>
+  ggplot(mapping = aes(x = sex, y = age, color = ethnic)) +
+    geom_jitter() + 
+    labs(
+      title = "Distribution of Sex and Age in AAE Familiarity Study",
+      x = "Sex",
+      y = "Age"
+    )
 ```
 
 **DVS-4: I can calculate numerical summaries of variables.**
 
--   Example 1
+-   Example 1 (Lab 3, Q6)
 
 ```{r dvs-4-1}
-
+hiphop_clean |>
+  distinct(word) |>
+  count(word, name = "wordCount") |>
+  summarize(
+      sumWords = sum(wordCount)
+  )
 ```
 
 -   Example 2
 
 ```{r dvs-4-2}
-
+ca_city_difference <- avocado_california |>
+  select(Date, type, AveragePrice, region) |>
+  pivot_wider(names_from = type, values_from = AveragePrice) |>
+  group_by(region) |>
+  summarize(type_diff = sum(organic)-sum(conventional), 
+            type_mean_diff = mean(organic)-mean(conventional),
+            mean_organic = mean(organic),
+            mean_conventional = mean(conventional)
+            ) |>
+  arrange(desc(type_mean_diff))
 ```
 
 **DVS-5: I can find summaries of variables across multiple groups.**
 
--   Example 1
+-   Example 1 (Challenge 3, 5.1)
 
 ```{r dvs-5-1}
-
+demographic |>
+  group_by(sex) |>
+  summarize(
+    across(
+      .cols = intl:hiphop,
+      .fns = mean
+      )
+    )
 ```
 
--   Example 2
+-   Example 2 (Challenge 3, 5.1 2)
 
 ```{r dvs-5-2}
-
+demographic |>
+  group_by(white) |>
+  summarize(
+    across(
+      .cols = intl:hiphop,
+      .fns = mean
+      )
+    )
 ```
 
 **DVS-6: I can create tables which make my summaries clear to the reader.**
 
--   Example 1
+-   Example 1 (Lab 4, Q3)
 
 ```{r dvs-6-1}
-
+avocado_major_region |>
+  group_by(region) |>
+  filter(year == "2017" & type == "organic") |>
+  summarize(total_sold = sum(sales_hass_small)) |>
+  slice_max(order_by = total_sold)
 ```
 
--   Example 2
+-   Example 2 (Lab 4, Q4)
 
 ```{r dvs-6-2}
-
+avocado_totalus |>
+  group_by(month) |>
+  summarize(total_sales = sum(total_volume)) |>
+  slice_max(order_by = total_sales)
 ```
 
 **DVS-7: I show creativity in my tables.**
 
--   Example 1
+-   Example 1 (Lab 4, Q6)
 
 ```{r dvs-7-1}
-
+ca_city_difference <- avocado_california |>
+  select(Date, type, AveragePrice, region) |>
+  pivot_wider(names_from = type, values_from = AveragePrice) |>
+  group_by(region) |>
+  summarize(type_diff = sum(organic)-sum(conventional), 
+            type_mean_diff = mean(organic)-mean(conventional),
+            mean_organic = mean(organic),
+            mean_conventional = mean(conventional)
+            ) |>
+  arrange(desc(type_mean_diff))
 ```
 
--   Example 2
+-   Example 2 (Challenge 4)
 
 ```{r dvs-7-2}
-
+ca_avocado_housing <- avocado_california |>
+  group_by(region, year) |>
+  summarize(
+    median_total_sold = median(total_volume), 
+    median_avocado_price = median(AveragePrice)
+  ) |>
+  inner_join(housing_prices, by = c("region", "year"))
 ```
 
 ## Program Efficiency
 
 **PE-1: I can write concise code which does not repeat itself.**
 
--   using a single function call
+-   using a single function call (Lab 4, Q2, rename function)
 
 ```{r pe-1-one-call}
-
+# Clean the base avocado dataset
+avocado_clean <- avocado |>
+  rename(
+    "sales_hass_small" = `4046`,
+    "sales_hass_large" = `4225`,
+    "sales_hass_extralarge" = `4770`,
+    "total_volume" = "Total Volume",
+    "bags_total" = "Total Bags",
+    "bags_small" = "Small Bags",
+    "bags_large" = "Large Bags",
+    "bags_extra_large" = "XLarge Bags"
+    ) |>
+  mutate(type = as.factor(type)) |>
+  select(!"...1")
 ```
 
--   `across()`
+-   `across()` (Lab 3, Q5)
 
 ```{r pe-1-across}
-
+hiphop_clean <- hiphop |>
+  # sets as factors
+  mutate(across(
+    .cols = c(
+      jayz,
+      sex,
+      ethnic,
+      barkley,
+      boondocks,
+      monique,
+      bieber,
+      jayz1,
+      boondocks1,
+      familiarity,
+      popularityScore
+    ), .fns = as.factor
+  )) 
 ```
 
 -   `map()` functions
 
 ```{r pe-1-map-1}
-
+# I don't believe we have used map() functions yet
 ```
 
 **PE-2: I can write functions to reduce repetition in my code.**
@@ -322,7 +619,7 @@ I've done this in the following provided assignments:
 -   Example 1
 
 ```{r pe2-1}
-
+# We have not written functions yet
 ```
 
 -   Example 2
@@ -333,16 +630,22 @@ I've done this in the following provided assignments:
 
 **PE-3:I can use iteration to reduce repetition in my code.**
 
--   `across()`
+-   `across()` (Lab 5 Q1)
 
 ```{r pe-3-across}
-
+surveys <- surveys |>
+  mutate(
+    across(
+    .cols = c(plot_type:taxa, day_of_week), 
+    .fns = as.factor
+    )
+  )
 ```
 
 -   `map()` functions (Provide 2 Examples)
 
 ```{r pe-3-map-1}
-
+# We have not used map functions yet
 ```
 
 ```{r pe-3-map-2}
@@ -351,10 +654,12 @@ I've done this in the following provided assignments:
 
 **PE-4: I can use modern tools when carrying out my analysis.**
 
+I don't believe we have used these specific types of tools yet
+
 -   Example 1
 
 ```{r pe-4-1}
-
+# 
 ```
 
 -   Example 2
@@ -364,6 +669,8 @@ I've done this in the following provided assignments:
 ```
 
 ## Data Simulation & Modeling
+
+We have not done these yet
 
 **DSM-1: I can simulate data from a *variety* of probability models.**
 
@@ -397,10 +704,18 @@ I've done this in the following provided assignments:
 
 <!-- How did you revise your thinking throughout the course? How did you revise your thinking on the code examples you have provided in your portfolio? -->
 
+I did a lot of revisions, nearly one every lab. A lot of the time, I made a mistake with using an incorrect function or way of accomplishing the goal, as there was usually a much more efficient and simple way of doing something. These help me learn the right way to do things instead of being stuck thinking the slower incorrect way is the proper way. Some of the code examples in the portfolio, such as the across function, were revised from a much more tedious and slower way of accomplishing it.
+
 ## Extending My Thinking
 
 <!-- How did you extended your thinking throughout the course? How did you extend your thinking on the code examples you have provided in your portfolio? -->
 
+I extended my thinking by creating custom tables in Challenge 4 to represent my data. I could definitely use with extending my thinking more, but I do try and learn from outside resources to implement my ideas whenever a relevant situation comes up in a lab or challenge.
+
 ## Peer Support & Collaboration
 
 <!-- Include an image of feedback you gave that you are proud of (either in a peer review or in Discord) -->
+
+My team is great and we all support each other by helping each other out during practice activities and kindly guiding each other on the right path. We were also were able to share the practice activity with each other through email when people requested it.
+
+![This screenshot shows me trying to help another student on discord. It didn't end up fixing it, but I did try and further help showing them other ways of turning off the messages for certain chunks. I ran into this issue in my projects too](images/image-728236484.png)
