@@ -674,15 +674,17 @@ We have not done these yet
 
 **DSM-1: I can simulate data from a *variety* of probability models.**
 
--   Example 1
+-   Example 1 (Practice 9.2)
 
 ```{r dsm-1-1}
+trombone_weights <- rnorm(n = 100, mean = 4.6, sd = 0.8)
 
 ```
 
--   Example 2
+-   Example 2 (Practice 9.2
 
 ```{r dsm-1-2}
+cornets <- runif(n_cor, min = 1.5, max = 3.5)
 
 ```
 
