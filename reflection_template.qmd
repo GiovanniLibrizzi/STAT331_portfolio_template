@@ -288,7 +288,7 @@ ggplot(data = survey_genus,
 -   Example 1
 
 ```{r r-3-1}
-
+# slice_max
 ```
 
 -   Example 2
@@ -637,7 +637,7 @@ surveys <- surveys |>
   mutate(
     across(
     .cols = c(plot_type:taxa, day_of_week), 
-    .fns = as.factor
+    .fns = ~ as.factor(.x)
     )
   )
 ```
