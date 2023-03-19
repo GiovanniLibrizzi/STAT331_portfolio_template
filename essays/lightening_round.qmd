@@ -4,15 +4,14 @@ format: html
 editor: visual
 ---
 
-If Chloe Feehan doesn\'t earn an A, then nobody should, because their code was incredibly tidy and efficient, and they had really nice formatting and attention to detail on their plots that was pleasant to read.
+If Chloe Feehan doesn't earn an A, then nobody should, because their code was incredibly tidy and efficient, and they had really nice formatting and attention to detail on their plots that was pleasant to read.
 
-The most difficult part of the class was coming to terms with the upgrading system, as I really didn\'t know why I needed to revise a whole assignment for getting one small part wrong, when I would be personally satisfied with a 90% (I may be lazy).
+The most difficult part of the class was coming to terms with the upgrading system, as I really didn't know why I needed to revise a whole assignment for getting one small part wrong, when I would be personally satisfied with a 90% (I may be lazy).
 
-The easiest part of the class for me was creating functions, as I\'m super familiar with abstracting parts of code into functions from other classes.
+The easiest part of the class for me was creating functions, as I'm super familiar with abstracting parts of code into functions from other classes.
 
 The part of the class that interested me the most was learning about the data simulation in R, as I was pretty unfamiliar with it and it was not as hard as it seemed at first.
 
-One piece of advice for a student starting this class is to ask for help from your peers if you\'re ever stuck.
+One piece of advice for a student starting this class is to ask for help from your peers if you're ever stuck.
 
 \
-
