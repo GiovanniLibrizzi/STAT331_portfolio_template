@@ -1,0 +1,133 @@
+---
+title: "Challenge 7"
+author: "Giovanni Librizzi"
+format: 
+  html: 
+    self-contained: true
+    code-tools: true
+editor: visual
+execute: 
+  echo: true
+  warning: false
+  message: false
+  error: true
+---
+
+# Revision
+
+In browsing the R functions to find a way to set values as NA I found replace, but I totally forgot about the vectorised if/case_when functions that we could use for this exact situation! I made sure to replace it with a case when, which will automatically set it to NA if the condition isn't met. When setting the condition index, I nested the condition index function inside the na setting function, which can make things unclear to the reader. I modified that chunk of code to run one function at a time, so it can be much clearer to the reader and easier to modify. I also accidentally kept a years variable in from when I was testing to see if it would work, so I made sure to remove that. Additionally, I changed the boxplots in the final graph to density plots and changed their colors to make it a lot more clear. I also included an explanation for why I modified the units like I did.
+
+### Setup
+
+```{r}
+library(tidyverse)
+library(ggridges)
+library(RColorBrewer)
+
+# import surveys
+recapture_data <- read_csv(here::here("Week7", "Lab", "BlackfootFish.csv"))
+recapture_data <- recapture_data |>
+  mutate(across(
+    c(trip, section, species), 
+    ~ as.factor(.x)
+  ))
+    
+```
+
+```{r}
+recapture_data |>
+  filter(species == "RBT") |>
+  summarize(
+    avg_length = median(length), 
+    avg_weight = median(weight, na.rm = TRUE)
+    )
+
+recapture_data <- recapture_data |>
+  mutate(length = length / 10)
+```
+
+Convert to a length unit that is compatible with the current condition index formula. I divided it by 10 because that caused the condition index to be a lot more centered around 1, making it seem like that's the proper units required by the formula.
+
+# 4.1 Part 1 - Replace Impossible Measurements with `NA`s
+
+```{r}
+
+
+# set values NA for a vector
+na_not_between <- function(measurements, min_val, max_val) {
+  stopifnot(is.numeric(measurements), length(measurements) >= 1)
+  
+  result <- case_when(
+      between(measurements, min_val, max_val) ~ measurements
+    )
+    
+
+    
+  return(result)
+}
+
+
+# Apply to the data 
+recapture_cut <- recapture_data |>
+  mutate(
+    length = na_not_between(
+      measurements = length, 
+      min_val = 2.5, 
+      max_val = 77.5),
+    weight = na_not_between(
+      measurements = weight, 
+      min_val = 0.9, 
+      max_val = 200)
+  )
+
+
+```
+
+# 4.2 Part 2
+
+```{r}
+# calculate the condition index of a fish
+condition_index <- function(weight, length) {
+
+    result <- (weight / (length^3)) * 100
+    return(result)
+  
+}
+
+# Create a new condition index column with restraints
+recapture_cut <- recapture_cut |>
+  mutate(
+    condition_index = condition_index(weight, length),
+    condition_index = na_not_between(
+      measurements = condition_index,
+      min_val = 0,
+      max_val = 5
+    )
+  )
+```
+
+# 4.3 Part 3
+
+```{r}
+
+recapture_cut |>
+  ggplot(mapping = aes(x = condition_index, y = factor(year))) +
+  geom_density_ridges(mapping = aes(fill = factor(year))) +
+  scale_colour_brewer(palette = "RdYlBu") +
+  xlim(0.3, 3) +
+  labs(
+    x = "Condition Index",
+    y = NULL,
+    title = "Condition Index over Year for Recaptured Fish in Blackfoot River",
+    color = "Section"
+  ) +
+  theme(
+    plot.title.position = "plot",
+    legend.position="none"
+  )
+
+```
+
+Fish conditions appear to have stayed relatively the same around the condition index. There were a lot more outliers in the past, but 2004 seems to be very close to 1 with not many outliers.
+
+xlim: https://ggplot2.tidyverse.org/reference/lims.html

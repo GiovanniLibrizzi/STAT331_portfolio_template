@@ -56,27 +56,36 @@ demographics <- hiphop_clean |>
 ```{r wd-3-numeric}
 under20 <- hiphop_clean |>
   filter(age < 20) |>
+  mutate(familiarity = as.numeric(familiarity)) |>
   group_by(word) |>
   summarize(
-    familiarity = mean(as.numeric(familiarity))
+    familiarity = mean(familiarity)
   ) 
 ```
 
--   character -- specifically a string (Lab 3, Q2)
+-   character -- specifically a string (Lab 9 Q1)
 
 ```{r wd-3-string}
-hiphop |>
-  filter(subj == "p15") 
+allison_data <- names_a |>
+  filter(Name == "Allison") |>
+  select(-Year) |>
+  group_by(State, Sex) |>
+  summarize(n = sum(Count)) |>
+  pivot_wider(names_from = Sex,
+              values_from = n,
+              values_fill = 0) |>
+  rename(Male = M, Female = F)
 ```
 
 -   factor (Lab 3, Q12)
 
 ```{r wd-3-factor}
 nonwhitewomen <- hiphop_clean |>
-  filter(white == FALSE & sex == "Female") |>
+  filter(white == FALSE, sex == "Female") |>
+  mutate(familiarity = as.numeric(familiarity)) |>
   group_by(word) |>
   summarize(
-    familiarity = mean(as.numeric(familiarity))
+    familiarity = mean(familiarity)
   ) 
 ```
 
@@ -89,21 +98,17 @@ suspects_clean <- suspects_clean %>%
 
 **WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
 
--   numeric (Lab 3 Q11)
+-   numeric (Lab 7 3.4)
 
 ```{r wd-4-numeric}
-under20 <- hiphop_clean |>
-  filter(age < 20) |>
-  group_by(word) |>
-  summarize(
-    familiarity = mean(as.numeric(familiarity))
-  ) 
+recapture_scaled <- recapture_data |>
+  mutate(length_scaled = rescale_01(length))
 ```
 
 -   character -- specifically a string (Challenge 4)
 
 ```{r wd-4-string}
-# I have not specifically converted to a character yet, but I have converted many strings to new variables
+
 housing_prices <- housing_prices |>
   pivot_longer(cols = `2015`:`2018`,
                names_to = "year",
@@ -111,26 +116,14 @@ housing_prices <- housing_prices |>
   mutate(year = as.numeric(year))
 ```
 
--   factor (Lab 3 Q5)
+-   factor (Lab 7 3.5)
 
 ```{r wd-4-factor}
-hiphop_clean <- hiphop |>
-  # sets as factors
-  mutate(across(
-    .cols = c(
-      jayz,
-      sex,
-      ethnic,
-      barkley,
-      boondocks,
-      monique,
-      bieber,
-      jayz1,
-      boondocks1,
-      familiarity,
-      popularityScore
-    ), .fns = as.factor
-  )) # more piping cut out here 
+  data <- data |>
+    mutate(across(
+      .cols = {{ variables }},
+      .fns = ~ rescale_01(.x)
+    ))
 ```
 
 -   date (Practice Activity 5.1)
@@ -285,35 +278,56 @@ ggplot(data = survey_genus,
 
 **R-3: I can write robust programs that are resistant to changes in inputs.**
 
--   Example 1
+-   Example 1 (Lab 3, Q11))
 
 ```{r r-3-1}
 # slice_max
+under20 <- hiphop_clean |>
+  filter(age < 20) |>
+  group_by(word) |>
+  summarize(
+    familiarity = mean(as.numeric(familiarity))
+  ) 
+under20 |>
+  slice_max(familiarity)
 ```
 
--   Example 2
+-   Example 2 (min/max function usage)
 
 ```{r r-3-2}
-
+rescale_01 <- function(vec) {
+  stopifnot(is.numeric(vec), length(vec) > 1)
+  #vec <- vec[!is.na(vec)]
+  v_min <- min(vec, na.rm = TRUE)
+  v_max <- max(vec, na.rm = TRUE)
+  
+  vec <- (vec - v_min) / (v_max - v_min)
+  
+  return(vec)
+}
 ```
 
 ## Data Visualization & Summarization
 
 **DVS-1: I can create visualizations for a *variety* of variable types (e.g., numeric, character, factor, date)**
 
--   numeric variables (Lab 4, Q5)
+-   numeric variables (Challenge 7, 4.3 part 3)
 
 ```{r dvs-1-num}
-# Generate plot
-options(scipen = 999)
-avocado_metro_region |>
-  semi_join(metro_top_5, by = join_by(region)) |>
-  ggplot(mapping = aes(x = total_volume, y = region)) +
-  geom_boxplot() +
+recapture_cut |>
+  ggplot(mapping = aes(x = condition_index, y = factor(year))) +
+  geom_density_ridges(mapping = aes(fill = factor(year))) +
+  scale_colour_brewer(palette = "RdYlBu") +
+  xlim(0.3, 3) +
   labs(
-    x = "Total Volume of Avocados Sold",
-    y = "Metro Region",
-    title = "Total Volume of Avocados Sold by the Metro Region"
+    x = "Condition Index",
+    y = NULL,
+    title = "Condition Index over Year for Recaptured Fish in Blackfoot River",
+    color = "Section"
+  ) +
+  theme(
+    plot.title.position = "plot",
+    legend.position="none"
   )
 ```
 
@@ -444,17 +458,25 @@ ggplot(data = surveys, mapping = aes(x = weight, y = species, color = genus)) +
    )
 ```
 
--   Example 2 (Lab 3, Q10) - jittered to show how much the age was clustered
+-   Example 2 (Challenge 7, 4.3 Pt 3)
 
 ```{r dvs-3-2}
-demographics |>
-  ggplot(mapping = aes(x = sex, y = age, color = ethnic)) +
-    geom_jitter() + 
-    labs(
-      title = "Distribution of Sex and Age in AAE Familiarity Study",
-      x = "Sex",
-      y = "Age"
-    )
+recapture_cut |>
+  ggplot(mapping = aes(x = condition_index, y = factor(year))) +
+  geom_density_ridges(mapping = aes(fill = factor(year))) +
+  scale_colour_brewer(palette = "RdYlBu") +
+  xlim(0.3, 3) +
+  labs(
+    x = "Condition Index",
+    y = NULL,
+    title = "Condition Index over Year for Recaptured Fish in Blackfoot River",
+    color = "Section"
+  ) +
+  theme(
+    plot.title.position = "plot",
+    legend.position="none"
+  )
+
 ```
 
 **DVS-4: I can calculate numerical summaries of variables.**
@@ -495,72 +517,93 @@ demographic |>
   summarize(
     across(
       .cols = intl:hiphop,
-      .fns = mean
+      .fns = ~ mean(.x)
       )
     )
 ```
 
--   Example 2 (Challenge 3, 5.1 2)
+-   Example 2 (Lab 7, 2.1)
 
 ```{r dvs-5-2}
-demographic |>
-  group_by(white) |>
+recapture_na <- recapture_data |>
   summarize(
-    across(
-      .cols = intl:hiphop,
-      .fns = mean
-      )
-    )
+   across(
+     trip:species,
+     ~ sum(is.na(.x)),
+     .names = "{.col}_na"
+   ) 
+  )
 ```
 
 **DVS-6: I can create tables which make my summaries clear to the reader.**
 
--   Example 1 (Lab 4, Q3)
+-   Example 1 (Challenge 9 Q10)
 
 ```{r dvs-6-1}
-avocado_major_region |>
-  group_by(region) |>
-  filter(year == "2017" & type == "organic") |>
-  summarize(total_sold = sum(sales_hass_small)) |>
-  slice_max(order_by = total_sold)
+allan_percent <- allan_state |>
+  group_by(State) |>
+  mutate(prop = Count / sum(Count)) |>
+  select(-Count) |>
+  pivot_wider(names_from = Name,
+              values_from = prop,
+              values_fill = 0)
+
+allan_percent %>%
+  gt() %>%
+  fmt_percent(columns = Alan:Allan, decimals = 2)
 ```
 
--   Example 2 (Lab 4, Q4)
+-   Example 2 (Challenge 7 Setup)
 
 ```{r dvs-6-2}
-avocado_totalus |>
-  group_by(month) |>
-  summarize(total_sales = sum(total_volume)) |>
-  slice_max(order_by = total_sales)
+rainbow_trout_avg <- recapture_data |>
+  filter(species == "RBT") |>
+  summarize(
+    avg_length = median(length), 
+    avg_weight = median(weight, na.rm = TRUE)
+    )
 ```
 
 **DVS-7: I show creativity in my tables.**
 
--   Example 1 (Lab 4, Q6)
+-   Example 1 (Challenge 9 Q8)
 
 ```{r dvs-7-1}
-ca_city_difference <- avocado_california |>
-  select(Date, type, AveragePrice, region) |>
-  pivot_wider(names_from = type, values_from = AveragePrice) |>
-  group_by(region) |>
-  summarize(type_diff = sum(organic)-sum(conventional), 
-            type_mean_diff = mean(organic)-mean(conventional),
-            mean_organic = mean(organic),
-            mean_conventional = mean(conventional)
-            ) |>
-  arrange(desc(type_mean_diff))
+alan_spelling <- names_a |>
+  filter(Name %in% c("Allan", "Alan", "Allen")) |>
+  group_by(Name, Year) |>
+  summarize(n = sum(Count))
+
+alan_spelling %>%
+  head(n = 15) %>%
+  knitr::kable(
+    caption = "Number of Babies Named Different Allen Spellings by Year (head=15)",
+    booktabs = TRUE
+  ) %>%
+  kable_styling(font_size = 10,
+                latex_options = "striped",
+                )
 ```
 
--   Example 2 (Challenge 4)
+-   Example 2 (Challenge 9 Q1)
 
 ```{r dvs-7-2}
-ca_avocado_housing <- avocado_california |>
-  group_by(region, year) |>
-  summarize(
-    median_total_sold = median(total_volume), 
-    median_avocado_price = median(AveragePrice)
+allison_data <- names_a |>
+  filter(Name == "Allison") |>
+  select(-Year) |>
+  group_by(State, Sex) |>
+  summarize(n = sum(Count)) |>
+  pivot_wider(names_from = Sex,
+              values_from = n,
+              values_fill = 0) |>
+  rename(Male = M, Female = F)
+
+allison_data |>
+  head(n = 15) |>
+  knitr::kable(
+    caption = "Number of Babies Named \"Allison\" by State and Sex (head=15)"
   ) |>
-  inner_join(housing_prices, by = c("region", "year"))
+  kable_styling(font_size = 15)
 ```
 
 ## Program Efficiency
@@ -604,28 +647,51 @@ hiphop_clean <- hiphop |>
       boondocks1,
       familiarity,
       popularityScore
-    ), .fns = as.factor
+    ), 
+    .fns = ~ as.factor(.x)
   )) 
 ```
 
--   `map()` functions
+-   `map()` functions (Lab 8 Step 3)
 
 ```{r pe-1-map-1}
-# I don't believe we have used map() functions yet
+phrases <- map_chr(
+      .x = line:1,
+      .f = ~ phrases[.x]
+    )
 ```
 
 **PE-2: I can write functions to reduce repetition in my code.**
 
--   Example 1
+-   Example 1 (Challenge 7, 4.1)
 
 ```{r pe2-1}
-# We have not written functions yet
+na_not_between <- function(measurements, min_val, max_val) {
+  stopifnot(is.numeric(measurements), length(measurements) >= 1)
+  
+  result <- case_when(
+      between(measurements, min_val, max_val) ~ measurements
+    )
+    
+  return(result)
+}
 ```
 
--   Example 2
+-   Example 2 (Lab 7, 3.5)
 
 ```{r pe2-2}
-
+rescale_column <- function(data, variables) {
+  stopifnot(is.data.frame(data))
+  
+  data <- data |>
+    mutate(across(
+      .cols = {{ variables }},
+      .fns = ~ rescale_01(.x)
+    ))
+  
+  return(data)
+  
+}
 ```
 
 **PE-3:I can use iteration to reduce repetition in my code.**
@@ -644,28 +710,47 @@ surveys <- surveys |>
 
 -   `map()` functions (Provide 2 Examples)
 
+    Challenge 8 Step 3
+
 ```{r pe-3-map-1}
-# We have not used map functions yet
+phrases <- map_chr(
+      .x = line:1,
+      .f = ~ if_else(
+          .x > 1, 
+          str_c(phrases[.x], ","), 
+          phrases[.x]
+      ) 
+    )
 ```
 
-```{r pe-3-map-2}
+Lab 8 Step 4
 
+```{r pe-3-map-2}
+full_song <- map_chr(
+    .x = 1:12,
+    .f = ~ sing_day(xmas2, .x, Full.Phrase)
+  )
 ```
 
 **PE-4: I can use modern tools when carrying out my analysis.**
 
-I don't believe we have used these specific types of tools yet
-
--   Example 1
+-   Example 1  (Lab 4, Q5) slice_max
 
 ```{r pe-4-1}
-# 
+metro_top_5 <- avocado_metro_region |>
+  group_by(region) |>
+  summarize(total_sales = sum(total_volume)) |>
+  slice_max(order_by = total_sales, n = 5)
 ```
 
--   Example 2
+-   Example 2 (lab 7 3.5) modern across syntax in function
 
 ```{r pe-4-2}
-
+  data <- data |>
+    mutate(across(
+      .cols = {{ variables }},
+      .fns = ~ rescale_01(.x)
+    ))
 ```
 
 ## Data Simulation & Modeling
@@ -690,16 +775,29 @@ cornets <- runif(n_cor, min = 1.5, max = 3.5)
 
 **DSM-2: I can fit a linear regression and extract necessary summary measures.**
 
--   Example 1
+-   Example 1 (Practice 9.1)
 
 ```{r dsm-2-1}
+animal_lm <- lm(weight_after ~ weight_before, data = animal)
+
+animal_lm |>
+  broom::augment() |>
+  ggplot(mapping = aes(y = .resid, x = .fitted)) +
+  geom_point()
 
 ```
 
--   Example 2
+-   Example 2 (Lab 9 Q6)
 
 ```{r dsm-2-2}
-
+allison_lm |>
+  broom::augment() |>
+  ggplot(mapping = aes(y = .resid, x = .fitted)) +
+  geom_point() +
+  labs(x = "Fitted",
+       y = "Residuals",
+       title = "Residuals of the Allison Model"
+       )
 ```
 
 ## Revising My Thinking
@@ -720,4 +818,6 @@ I extended my thinking by creating custom tables in Challenge 4 to represent my 
 
 My team is great and we all support each other by helping each other out during practice activities and kindly guiding each other on the right path. We were also were able to share the practice activity with each other through email when people requested it.
 
-![This screenshot shows me trying to help another student on discord. It didn't end up fixing it, but I did try and further help showing them other ways of turning off the messages for certain chunks. I ran into this issue in my projects too](images/image-728236484.png)
+![](images/image-684072400.png)
+
+This picture shows a time I helped someone in the discord with a conceptual issue they were having. I walked them through what steps they could do to achieve the goal they were after without providing code or making it too easy for them.

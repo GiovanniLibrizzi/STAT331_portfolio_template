@@ -1,0 +1,163 @@
+---
+title: "Lab 7"
+author: "Giovanni Librizzi"
+format: 
+  html: 
+    self-contained: true
+    code-tools: true
+editor: visual
+execute: 
+  echo: true
+  warning: false
+  message: false
+  error: true
+---
+
+# Revision
+
+I made a mistake on Part 2 Q 1 where I ran the same min function twice, when it could have easily been made into a variable to reduce needless repetition and increase the function's efficiency. I made sure to change the min and max into variables and then use that variable in the final equation the function returns. I also had a mistake in Part 2 Q 6 where I used quotations in the function to specify columns instead of just passing those columns in. It didn't actually work without quotes immediately though, I had to modify my `stopifnot()` to allow it to work, but I have now updated it so it's without quotes for the columns. I also updated Part 2 Q5 to have `.fns`.
+
+### Setup
+
+```{r}
+library(tidyverse)
+# import surveys
+recapture_data <- read_csv(here::here("Week7", "Lab", "BlackfootFish.csv"))
+recapture_data <- recapture_data |>
+  mutate(across(
+    c(trip, section, species), 
+    ~ as.factor(.x)
+  ))
+    
+
+```
+
+# 2: Part 1: Summaries and Plots (Midterm Review)
+
+## 2.1 Summarizing Missing Data
+
+```{r}
+recapture_na <- recapture_data |>
+  summarize(
+   across(
+     trip:species,
+     ~ sum(is.na(.x)),
+     .names = "{.col}_na"
+   ) 
+  )
+recapture_na
+```
+
+The variable with missing values is the weight, which has 1796 rows with NA
+
+## 2.2 Visualizing Missing Data
+
+Visualize the frequency of missing values across the different years, sections, and trips
+
+```{r}
+recapture_missing <- recapture_data |>
+  filter(is.na(weight))
+
+recapture_missing |>
+  group_by(year, trip, section) |>
+  summarize(count = n()) |>
+  ggplot(mapping = aes(x = year, y = count, color = trip)) +
+    geom_line() +
+    geom_point() +
+    facet_wrap(~ section) +
+    labs(
+      x = "Year Captured",
+      y = NULL,
+      color = "Trip",
+      title = "Recaptured Fish Missing Data for Weight Over Year by Trip and Section"
+    ) +
+    theme(
+      plot.title.position = "plot"
+    )
+```
+
+# 3: Part 2: Adjusting the Data (Function Writing)
+
+## 3.1 Writing a Function
+
+```{r}
+rescale_01 <- function(vec) {
+  stopifnot(is.numeric(vec), length(vec) > 1)
+  #vec <- vec[!is.na(vec)]
+  v_min <- min(vec, na.rm = TRUE)
+  v_max <- max(vec, na.rm = TRUE)
+  
+  vec <- (vec - v_min) / (v_max - v_min)
+  
+  return(vec)
+}
+```
+
+## 3.2 Adding Stops
+
+Added above \^
+
+## 3.3 Performing a Simple Test
+
+```{r}
+x <- c(1:85, NA)
+
+rescale_01(x)
+```
+
+## 3.4 Performing a More Difficult Test
+
+```{r}
+#| layout-nrow: 2
+recapture_scaled <- recapture_data |>
+  mutate(length_scaled = rescale_01(length))
+
+recapture_scaled |>
+  ggplot(mapping = aes(x = length)) + 
+    geom_density() +
+    labs(
+      x = "Length (mm)",
+      y = NULL,
+      title = "Density of Length for Recaptured Fish"
+    )
+
+recapture_scaled |>
+  ggplot(mapping = aes(x = length_scaled)) + 
+    geom_density() +
+    scale_y_continuous(
+      labels = function(x) format(x, nsmall = 3)
+    ) +
+    labs(
+      x = "Length (rescaled)",
+      y = NULL,
+      title = "Density of Length (rescaled) for Recaptured Fish"
+    )
+
+```
+
+nsmall function to show more decimal places: https://stackoverflow.com/questions/38722202/how-do-i-change-the-number-of-decimal-places-on-axis-labels-in-ggplot2
+
+## 3.5 Incorporating Variables
+
+```{r}
+rescale_column <- function(data, variables) {
+  stopifnot(is.data.frame(data))
+  
+  data <- data |>
+    mutate(across(
+      .cols = {{ variables }},
+      .fns = ~ rescale_01(.x)
+    ))
+  
+  return(data)
+  
+}
+```
+
+## 3.6 Another Function Test
+
+```{r}
+recapture_rescale <- rescale_column(recapture_data, length:weight)
+
+recapture_rescale
+```

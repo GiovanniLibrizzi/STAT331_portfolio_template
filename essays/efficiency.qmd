@@ -3,3 +3,8 @@ title: "The Power of Efficiency"
 format: html
 editor: visual
 ---
+
+Efficiency is incredibly important in all forms of computing, including data science/statistics. The base definition of efficiency is to achieve maximum productivity with no wasted effort, and so efficiency in statistical computing is eliminating duplicate function calls and making sure the functions that you are using are the most optimal way of achieving that goal. If you\'re using a depreciated function, that can also be inefficient as the underlying code hasn\'t been updated over time, meaning there may be faster ways of achieving that. Efficiency allows you to be able to process more in a shorter amount of time, reducing how long it takes to run a function. It\'s incredibly important in data science, as we can be dealing with very large data sets which can potentially take a long time to filter through, so making sure you as an R programmer aren\'t repeating those expensive calls to filter and other similar functions can help the program run a lot faster. One way I was encountering efficiency was in my mutate across functions, where I had originally stacked several mutates together to try and change a variable type in PE-1 example 2. I then realized I could do a mutate across, which would help the program run a lot faster, as internally the R language knows how to optimize for multiple columns instead of having to mutate everything several times.
+
+\
+

@@ -1,0 +1,189 @@
+---
+title: "Challenge 9"
+author: "Giovanni Librizzi"
+format: 
+  html: 
+    self-contained: true
+    code-tools: true
+editor: visual
+execute: 
+  echo: true
+  warning: false
+  message: false
+  error: true
+---
+
+# Revision
+
+My interactive table was grouped, when it should have been ungrouped to allow for more searching.
+
+### Setup
+
+```{r}
+library(tidyverse)
+library(gt)
+library(kableExtra)
+library(DT)
+names_a <- read_csv(here::here("Week9", "Lab", "StateNames_A.csv"))
+names_a <- names_a |>
+  rename(Sex = Gender)
+```
+
+# 3. Summarizing & Visualizing the Number of Allisons
+
+1\.
+
+```{r}
+allison_data <- names_a |>
+  filter(Name == "Allison") |>
+  select(-Year) |>
+  group_by(State, Sex) |>
+  summarize(n = sum(Count)) |>
+  pivot_wider(names_from = Sex,
+              values_from = n,
+              values_fill = 0) |>
+  rename(Male = M, Female = F)
+
+allison_data |>
+  head(n = 15) |>
+  knitr::kable(
+    caption = "Number of Babies Named \"Allison\" by State and Sex (head=15)"
+  ) |>
+  kable_styling(font_size = 15)
+
+DT::datatable(names_a)
+```
+
+2\.
+
+```{r}
+allison_f <- names_a |>
+  filter(Name == "Allison", 
+         Sex == "F") |>
+  select(-State) |>
+  group_by(Year) |>
+  summarize(n = sum(Count))
+
+allison_f |>
+  head(n = 15) |>
+  knitr::kable(
+    caption = "Number of Babies Named \"Allison\" with Female Sex by Year (head=15)"
+  ) |>
+  kable_styling(font_size = 15)
+```
+
+3\.
+
+```{r}
+allison_f |>
+  ggplot(mapping = aes(x = Year, y = n)) +
+  geom_line() +
+  geom_point() +
+  labs(y = NULL,
+       title = "Number of Babies With The Name Allison By Year"
+       )
+
+```
+
+# 4. Modeling the Number of Allisons
+
+4.  Fit a linear model with the year as the explanatory variable, and the number of Allisons as the response. Similar to #3, each year should have one observation--the total number of Allisons born that year.
+
+```{r}
+allison_lm <- lm(n ~ Year, data = allison_f)
+```
+
+5.  Write out the estimated regression equation.
+
+    n = 209689.8 - 101\*Year
+
+<!-- -->
+
+6.  Plot the residuals of the model, that is, the actual values minus the predicted values. Comment on the residuals - do you see any patterns?
+
+```{r}
+allison_lm |>
+  broom::augment() |>
+  ggplot(mapping = aes(y = .resid, x = .fitted)) +
+  geom_point() +
+  labs(x = "Fitted",
+       y = "Residuals",
+       title = "Residuals of the Allison Model"
+       )
+```
+
+The residuals start tight and spread out over time on the y-axis, so at the end they are very spread out. They almost seem to trend downward too.
+
+7.  From the spread of this model, we can see the name is very varied in popularity, but does seem to be more unpopular now
+
+# 5. Spelling by State
+
+8\.
+
+```{r}
+alan_spelling <- names_a |>
+  filter(Name %in% c("Allan", "Alan", "Allen")) |>
+  group_by(Name, Year) |>
+  summarize(n = sum(Count))
+
+alan_spelling %>%
+  head(n = 15) %>%
+  knitr::kable(
+    caption = "Number of Babies Named Different Allen Spellings by Year (head=15)",
+    booktabs = TRUE
+  ) %>%
+  kable_styling(font_size = 10,
+                latex_options = "striped",
+                )
+```
+
+```{r}
+alan_spelling |>
+  ggplot(mapping = aes(x = Year, y = n, color = Name)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    y = NULL,
+    title = "Number of Babies with Different Spellings of Allen by Year"
+  )
+  
+```
+
+9\.
+
+```{r}
+allan_state <- names_a |>
+  filter(Name %in% c("Allan", "Alan", "Allen"),
+         Year == 2000,
+         Sex == "M",
+         State %in% c("CA", "PA")) |>
+  select(-Sex, -Year) |>
+  group_by(Name, State) 
+
+allan_state_wide <- allan_state |>
+  pivot_wider(names_from = Name,
+              values_from = Count,
+              values_fill = 0)
+
+allan_state_wide |>
+  knitr::kable(
+    caption = "Babies Born with Differing Spellings of Alan by State"
+  )
+```
+
+10. 
+
+```{r}
+allan_percent <- allan_state |>
+  group_by(State) |>
+  mutate(prop = Count / sum(Count)) |>
+  select(-Count) |>
+  pivot_wider(names_from = Name,
+              values_from = prop,
+              values_fill = 0)
+
+# Why is it moving the state column??????? 
+allan_percent %>%
+  gt() %>%
+  fmt_percent(columns = Alan:Allan, decimals = 2)
+```
