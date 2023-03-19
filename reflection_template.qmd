@@ -41,7 +41,9 @@ military <- read_xlsx(here::here("data",
 read_delim("Ages_Data/ages_mystery.txt", delim = "|")
 ```
 
-**WD-2: I can select necessary columns from a dataset. (Lab 3, Q9)**
+**WD-2: I can select necessary columns from a dataset.**
+
+(Lab 3, Q9)
 
 ```{r wd-2}
 demographics <- hiphop_clean |>
@@ -278,7 +280,7 @@ ggplot(data = survey_genus,
 
 **R-3: I can write robust programs that are resistant to changes in inputs.**
 
--   Example 1 (Lab 3, Q11))
+-   Example 1 (Lab 3, Q11)
 
 ```{r r-3-1}
 # slice_max
@@ -292,7 +294,7 @@ under20 |>
   slice_max(familiarity)
 ```
 
--   Example 2 (min/max function usage)
+-   Example 2 (Lab 7, 3.1) (min/max function usage)
 
 ```{r r-3-2}
 rescale_01 <- function(vec) {
@@ -492,7 +494,7 @@ hiphop_clean |>
   )
 ```
 
--   Example 2
+-   Example 2 (Lab 4, Q6)
 
 ```{r dvs-4-2}
 ca_city_difference <- avocado_california |>
@@ -743,7 +745,7 @@ metro_top_5 <- avocado_metro_region |>
   slice_max(order_by = total_sales, n = 5)
 ```
 
--   Example 2 (lab 7 3.5) modern across syntax in function
+-   Example 2 (lab 7 3.5) modern across syntax in function, pipe
 
 ```{r pe-4-2}
   data <- data |>
