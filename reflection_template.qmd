@@ -11,7 +11,7 @@ execute:
   echo: true
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an A-. I have put a lot of effort into this class and I really have enjoyed learning a langauge that's got quite a different approach than most. I really like seeing how it combines stuff like SQL-style table querying with simple file parsing and easy graph creation and customization. Although I've had to do a lot of revisions, I try and stay on top of them to make sure I'm still up to date in the class.
+[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an A. I have put a lot of effort into this class and I really have enjoyed learning a langauge that's got quite a different approach than most. I really like seeing how it combines stuff like SQL-style table querying with simple file parsing and easy graph creation and customization. Although I've had to do a lot of revisions, I try and stay on top of them to make sure I'm still up to date in the class.
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from a Lab or Challenge assignment where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
