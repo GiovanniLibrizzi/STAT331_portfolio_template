@@ -65,18 +65,14 @@ under20 <- hiphop_clean |>
   ) 
 ```
 
--   character -- specifically a string (Lab 9 Q1)
+-   character -- specifically a string (Practice activity 8 make_phrase)
 
 ```{r wd-3-string}
-allison_data <- names_a |>
-  filter(Name == "Allison") |>
-  select(-Year) |>
-  group_by(State, Sex) |>
-  summarize(n = sum(Count)) |>
-  pivot_wider(names_from = Sex,
-              values_from = n,
-              values_fill = 0) |>
-  rename(Male = M, Female = F)
+if (str_detect(str_sub(item, 1, 1), "[aeiou]")) {
+  item <-str_c("an", item, sep = " ")
+} else {
+  item <-str_c("a", item, sep = " ")
+}
 ```
 
 -   factor (Lab 3, Q12)
@@ -107,15 +103,25 @@ recapture_scaled <- recapture_data |>
   mutate(length_scaled = rescale_01(length))
 ```
 
--   character -- specifically a string (Challenge 4)
+-   character -- specifically a string (Practice Activity 8)
 
 ```{r wd-4-string}
 
-housing_prices <- housing_prices |>
-  pivot_longer(cols = `2015`:`2018`,
-               names_to = "year",
-               values_to = "median_house_cost") |>
-  mutate(year = as.numeric(year))
+pluralize_gift <- function(gift){
+
+  if (str_detect(gift, "o{2}")) {
+    gift <- str_replace(gift, "o{2}", "ee")
+  } else if (str_detect(gift, "y$")) {
+    gift <- str_replace(gift, "y$", "ies")
+  } else {
+    gift <- str_c(gift, "s", sep = "")
+  }
+
+
+  return(gift)
+
+}
+
 ```
 
 -   factor (Lab 7 3.5)
