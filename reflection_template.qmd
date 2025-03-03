@@ -763,8 +763,6 @@ metro_top_5 <- avocado_metro_region |>
 
 ## Data Simulation & Modeling
 
-We have not done these yet
-
 **DSM-1: I can simulate data from a *variety* of probability models.**
 
 -   Example 1 (Practice 9.2)
