@@ -11,9 +11,7 @@ execute:
   echo: true
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an A. I have put a lot of effort into this class and I really have enjoyed learning a langauge that's got quite a different approach than most. I really like seeing how it combines stuff like SQL-style table querying with simple file parsing and easy graph creation and customization. Although I've had to do a lot of revisions, I try and stay on top of them to make sure I'm still up to date in the class.
-
-[**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from a Lab or Challenge assignment where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
+These code chunks are provided from Labs and Challenges that demonstrate proficiency with a wide variety of R techniques.
 
 ## Working with Data
 
@@ -339,6 +337,8 @@ recapture_cut |>
   )
 ```
 
+![](images/image-1818941347.png)
+
 -   numeric variables and categorical variables (Lab 5, Q3.2)
 
 ```{r dvs-2-num-cat}
@@ -359,6 +359,8 @@ ggplot(data = rodents_week,
     plot.title.position = "plot"
   )
 ```
+
+![](images/image-1993423438.png)
 
 -   categorical variables (Lab 4 Q7)
 
@@ -387,6 +389,8 @@ ca_hass_type |>
   )
 ```
 
+![](images/image-52694323.png)
+
 -   dates (Lab 5, Q2.4)
 
 ```{r dvs-2-date}
@@ -408,6 +412,8 @@ ggplot(data = survey_genus,
     plot.title.position = "plot"
   )
 ```
+
+![](images/image-1032469904.png)
 
 **DVS-2: I use plot modifications to make my visualization clear to the reader.**
 
@@ -452,6 +458,8 @@ ggplot(data = surveys,
   )
 ```
 
+![](images/image-731949865.png)
+
 **DVS-3: I show creativity in my visualizations**
 
 -   Example 1 (Challenge 2, Q2.2)
@@ -465,6 +473,8 @@ ggplot(data = surveys, mapping = aes(x = weight, y = species, color = genus)) +
        title = "Distribution of Weight Within Species"
    )
 ```
+
+![](images/image-1006870100.png)
 
 -   Example 2 (Challenge 7, 4.3 Pt 3)
 
@@ -486,6 +496,8 @@ recapture_cut |>
   )
 
 ```
+
+![](images/image-1324580255.png)
 
 **DVS-4: I can calculate numerical summaries of variables.**
 
@@ -593,6 +605,8 @@ alan_spelling %>%
                 )
 ```
 
+![](images/image-946160797.png)
+
 -   Example 2 (Challenge 9 Q1)
 
 ```{r dvs-7-2}
@@ -613,6 +627,8 @@ allison_data |>
   ) |>
   kable_styling(font_size = 15)
 ```
+
+![](images/image-183176312.png)
 
 ## Program Efficiency
 
