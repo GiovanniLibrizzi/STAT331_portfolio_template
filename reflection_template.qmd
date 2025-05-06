@@ -1,5 +1,5 @@
 ---
-title: "STAT 331 Portfolio"
+title: "Statistical Computing with R Portfolio"
 author: "Giovanni Librizzi"
 format: 
   html: 
@@ -821,25 +821,3 @@ allison_lm |>
        title = "Residuals of the Allison Model"
        )
 ```
-
-## Revising My Thinking
-
-<!-- How did you revise your thinking throughout the course? How did you revise your thinking on the code examples you have provided in your portfolio? -->
-
-I did a lot of revisions, nearly one every lab. A lot of the time, I made a mistake with using an incorrect function or way of accomplishing the goal, as there was usually a much more efficient and simple way of doing something. These help me learn the right way to do things instead of being stuck thinking the slower incorrect way is the proper way. Some of the code examples in the portfolio, such as the across function, were revised from a much more tedious and slower way of accomplishing it.
-
-## Extending My Thinking
-
-<!-- How did you extended your thinking throughout the course? How did you extend your thinking on the code examples you have provided in your portfolio? -->
-
-I extended my thinking by creating custom tables in Challenge 4 to represent my data. I could definitely use with extending my thinking more, but I do try and learn from outside resources to implement my ideas whenever a relevant situation comes up in a lab or challenge.
-
-## Peer Support & Collaboration
-
-<!-- Include an image of feedback you gave that you are proud of (either in a peer review or in Discord) -->
-
-My team is great and we all support each other by helping each other out during practice activities and kindly guiding each other on the right path. We were also were able to share the practice activity with each other through email when people requested it.
-
-![](images/image-684072400.png)
-
-This picture shows a time I helped someone in the discord with a conceptual issue they were having. I walked them through what steps they could do to achieve the goal they were after without providing code or making it too easy for them.
