@@ -144,12 +144,6 @@ suspects <- suspects %>%
 
 **WD-5: I can use mutating joins to combine multiple dataframes.**
 
--   `left_join()`
-
-```{r wd-5-left}
-# I have not encountered a situation that required a left_join so far.
-```
-
 -   `right_join()` (Preview Activity 4.3)
 
 ```{r wd-5-right}
